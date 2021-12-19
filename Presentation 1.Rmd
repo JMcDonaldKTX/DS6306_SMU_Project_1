@@ -1,0 +1,106 @@
+---
+title: "UNIT 8"
+author: "ranjan"
+date: "12/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+###How many breweries are present in each state?
+
+```{r}
+library(dplyr)
+library("ggplot2")
+library(tidyr)
+
+Breweries <- read.csv("Breweries.csv", header = TRUE , ",")
+totals = Breweries %>% count (State)
+totals %>% ggplot(aes(x = State,y=n, fill = factor(State))) + geom_bar(stat='identity') + geom_text(aes(x= State,n +1, label = n, fill = NULL), data = totals)+ ggtitle("Total Breweries in each State")
+
+```
+
+###Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.  (RMD only, this does not need to be included in the presentation or the deck.)
+
+```{r}
+Beers <- read.csv("Beers.csv", header = TRUE , ",")
+BeerN <- rename(Beers,"Brew_ID" = "Brewery_id")
+tdf <- merge(BeerN,Breweries, by = "Brew_ID", na.rm = True)
+
+View(tdf)
+head(tdf,n=6)
+tail (tdf,n=6)
+
+###EXTRA
+top_n(tdf,6,Brew_ID)
+
+```
+
+###.   Address the missing values in each column
+```{r}
+
+colSums(is.na(tdf))
+
+
+library(tidyr)  
+### assigning to new data frame 
+dtdf <- tdf[!is.na(tdf$ABV), ]
+dtdf <- tdf[!is.na(tdf$IBU), ]
+
+colSums(is.na(dtdf))
+
+
+
+```
+
+###4.Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+
+```{r}
+
+df1<- dtdf %>% group_by(State) %>% summarise(Median_ABV = median(ABV)) 
+ggplot(data = df1, aes(x= State, y = Median_ABV ,fill = State))+geom_bar(stat='identity') + ggtitle ("State v.Median_ABV")
+## question how can I do both at the same time 
+
+
+
+
+
+df2<- dtdf %>% group_by(State) %>% summarise(Median_IBU = median(IBU)) 
+ggplot(data = df2, aes(x= State, y = Median_IBU ,fill = State))+geom_bar(stat='identity')+ ggtitle ("State v.Median_IBU")
+
+```
+
+###5.Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer? 
+
+```{r}
+#row number with of max value can be obtained by which.max, to get all information using by subsetting data frame. 
+
+df1[which.max(df1$Median_ABV),] ###Maine
+
+
+df2[which.max(df2$Median_IBU),]  ###Maine
+
+```
+
+###6.Comment on the summary statistics and distribution of the ABV variable.
+```{r}
+summary(df1)
+
+sd(df1$Median_ABV)   ###0.005437061
+mean(df1$Median_ABV)  ### 0.05564
+
+hist(df1$Median_ABV,col ="red", main = "Histogram of ABV")
+
+
+```
+
+##7.   Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.  Make your best judgment of a relationship and EXPLAIN your answer.
+```{r}
+
+df3 <- merge(df1,df2, by = "State")
+ df3 %>% ggplot(aes(x=Median_ABV,y= Median_IBU,fill = State))+geom_point()+geom_smooth (formula = y~ x,method="lm")+ggtitle(("ABV vs IBU"))
+```
+

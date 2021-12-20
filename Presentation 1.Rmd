@@ -1,5 +1,5 @@
 ---
-title: "Presentation 1"
+title: "DS6306 Case Study 01"
 author: "Ranjan Karki & Jason McDonald"
 date: "12/18/2021"
 output: html_document

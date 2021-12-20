@@ -5,6 +5,4 @@
 
 1. Presentation 1.Rmd - R Markdown file containing the solution to the project assigned as part of DS6306
 2. Breweries.csv - Contains a list of breweries
-3. Beers.csv - Conatins a list of beers
-
-DS6306 @ SMU Project 1 Team Repository.  Team Members: Ranjan Karki &amp; Jason McDonald
+3. Beers.csv - Contains a list of beers

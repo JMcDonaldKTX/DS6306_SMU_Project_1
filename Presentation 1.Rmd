@@ -93,22 +93,26 @@ df2[which.max(df2$Median_IBU),]  ###Maine
 ```
 
 ## Question 6: Comment on the summary statistics and distribution of the ABV variable.
+### In analyzing the alcohol content of the craft beers, we see a roughly normal distribution along the median with the mean, represented in red, and median, in yellow, falling close to each other.  We do some outliers such as the max ABV of 12.5, more than double the mean.  On the low side, we as well see a small number with a low ABV.
 
 ```{r "Question 6", message = FALSE, warning = FALSE}
-summary(df1)
+summary(dtdf$ABV)
 
-sd(df1$Median_ABV)   ###0.005437061
-mean(df1$Median_ABV)  ### 0.05564
+sd(dtdf$ABV*100)   ###0.005437061
+mean(dtdf$ABV*100)  ### 0.05564
 
-hist(df1$Median_ABV,col ="red", main = "Histogram of ABV")
+ggplot(dtdf, aes(x = ABV*100)) + geom_histogram(aes(y = ..count..), fill = '#971B1E') + scale_y_continuous(name = "Frequency") + theme(legend.position = 'none') + scale_x_continuous(name = 'Median ABV (%)', breaks = seq(2,13,.5)) + geom_vline(aes(xintercept = mean(dtdf$ABV *100)),col='#FFF200',size=1) + geom_vline(aes(xintercept = median(dtdf$ABV *100)),col='#E02124',size=1)
 
 
 ```
 
-##7.   Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.  Make your best judgment of a relationship and EXPLAIN your answer.
+## Question 7: Is there an apparent relationship between the bitterness of the beer and its alcoholic content? Draw a scatter plot.  Make your best judgment of a relationship and EXPLAIN your answer.
+### While there appears to be some positive relationship between ABV and IBU, it appears to be somewhat weak.  There are numerous outliers, specifically those with a high ABV but low IBU, that don't fit well within that explanation.  This isn't unexpected upon additional review of the data, as seen below, as IPAs are known for their bitterness and higher alcohol content.  Taking a look at what type of beers have the highest ABV while the lowest IBU shows that that group consists primarily with beers you would expect to find lower IBUs such as Ales and Witbeer.
 ```{r "Question 7", message = FALSE, warning = FALSE}
 
-df3 <- merge(df1,df2, by = "State")
- df3 %>% ggplot(aes(x=Median_ABV,y= Median_IBU,fill = State))+geom_point()+geom_smooth (formula = y~ x,method="lm")+ggtitle(("ABV vs IBU"))
+dtdf %>% ggplot(aes(x=ABV,y= IBU)) + geom_point() + geom_smooth (formula = y~ x,method="lm",col='#E02124',size=1) + ggtitle(("Relationship between ABV and IBU"))
+outliers <- dtdf[dtdf$ABV > 0.075, ]
+outliers <- outliers[outliers$IBU < 25, ]
+outliers
 ```
 

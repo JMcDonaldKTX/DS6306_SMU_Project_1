@@ -18,7 +18,7 @@ With that, if you are ready, let's walk through our initial findings within the 
 
 
 ## Question 1: How many breweries are present in each state?
-### To approach this question, we were able to read in the data contained in the list of Breweries and count the number in each state.
+### To approach this question, we were able to read in the data contained in the list of Breweries and count the number in each state. As you can see, Colorado leads with 47 breweries while 4 different states, West Virginia, South Dakota, North Dakota, and Washington DC only have 1 brewery.
 ```{r "Question 1", message = FALSE, warning = FALSE}
 library(dplyr)
 library(ggplot2)
@@ -26,20 +26,20 @@ library(tidyr)
 #Read in Breweries.csv and setup a list with the state and count of each state, then build a barplot
 Breweries <- read.csv("Breweries.csv", header = TRUE , ",")
 totals <- Breweries %>% count (State)
-q1 <- ggplot(data=totals, aes(x = State,y=n, fill = n, width = 0.8)) + geom_bar(stat='identity') + scale_fill_gradient2(midpoint=mean(totals$n), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + geom_text(aes(x= State,n +1, label = n), data = totals)+ ggtitle("Total Breweries in each State") + coord_flip() + theme(legend.title = element_text(colour='#331D0C')) + labs(fill="Count of Breweries", y = "Count of Breweries")
+q1 <- ggplot(data=totals, aes(x = State,y=n, fill = n, width = 0.8)) + geom_bar(stat='identity', width=0.7) + scale_fill_gradient2(midpoint=mean(totals$n), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + geom_text(aes(x= State,n +1, label = paste(State, n, sep=' - ')), data = totals, position = position_dodge(width = 1), hjust = -0.1, size = 4) + ggtitle("Total Breweries in each State") + coord_flip() + theme(legend.title = element_text(colour='#331D0C')) + labs(fill="Count of Breweries", y = "Count of Breweries") + scale_y_continuous(limits = c(0,max(totals$n) *1.1))
 ```
 
 ### The below barplot displays the count of breweries per state. 
-```{r "Question 1 Result", message = FALSE, warning = FALSE, fig.dim = c(5,7)}
+```{r "Question 1 Result", message = FALSE, warning = FALSE, fig.dim = c(11,9)}
 q1
 ```
 
-###Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.  (RMD only, this does not need to be included in the presentation or the deck.)
+## Question 2: Merge beer data with the breweries data. Print the first 6 observations and the last six observations to check the merged file.  (RMD only, this does not need to be included in the presentation or the deck.)
 
 ```{r "Question 2", message = FALSE, warning = FALSE}
 Beers <- read.csv("Beers.csv", header = TRUE , ",")
 BeerN <- rename(Beers,"Brew_ID" = "Brewery_id")
-tdf <- merge(BeerN,Breweries, by = "Brew_ID", na.rm = True)
+tdf <- merge(BeerN,Breweries, by = "Brew_ID", na.rm = True) %>% rename(Beer = Name.x, Brewery = Name.y)
 
 #View(tdf)
 head(tdf,n=6)
@@ -50,41 +50,37 @@ top_n(tdf,6,Brew_ID)
 
 ```
 
-###.   Address the missing values in each column
+## Question 3: Address the missing values in each column.
+### We found 1005 beers which didn't have an IBU value and 62 that didn't have an ABV.  As your questions pertain to these values and there is no method that we can use to approximate the missing values, removing these beers from the dataset was the only option.
 ```{r "Question 3", message = FALSE, warning = FALSE}
 
 colSums(is.na(tdf))
-
-
-library(tidyr)  
+  
 ### assigning to new data frame 
 dtdf <- tdf[!is.na(tdf$ABV), ]
 dtdf <- tdf[!is.na(tdf$IBU), ]
 
 colSums(is.na(dtdf))
 
-
-
 ```
 
-###4.Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+## Question 4: Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
+### To identify the median ABV and IBU by state, we performed a calculation on the dataset, grouping by state and finding the mediam in each.  We then generated barplots as seen here.  
 
-```{r "Question 4", message = FALSE, warning = FALSE}
+```{r "Question 4", message = FALSE, warning = FALSE, fig.dim = c(11,9)}
 
 df1<- dtdf %>% group_by(State) %>% summarise(Median_ABV = median(ABV)) 
-ggplot(data = df1, aes(x= State, y = Median_ABV ,fill = State))+geom_bar(stat='identity') + ggtitle ("State v.Median_ABV")
+ggplot(data = df1, aes(x= State, y = Median_ABV * 100 ,fill = Median_ABV))+geom_bar(stat='identity', width=0.7) + ggtitle ("State v.Median_ABV") + scale_fill_gradient2(midpoint=mean(df1$Median_ABV), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + coord_flip() + geom_text(data = df1, aes(x = State, label = paste(State, paste(Median_ABV * 100, '%', sep = ''), sep=' - ')), position = position_dodge(width = 1), hjust = -0.1, size = 4) + scale_y_continuous(limits = c(0,max(df1$Median_ABV * 100) *1.1)) 
 ## question how can I do both at the same time 
 
 
-
-
-
 df2<- dtdf %>% group_by(State) %>% summarise(Median_IBU = median(IBU)) 
-ggplot(data = df2, aes(x= State, y = Median_IBU ,fill = State))+geom_bar(stat='identity')+ ggtitle ("State v.Median_IBU")
+ggplot(data = df2, aes(x= State, y = Median_IBU ,fill = Median_IBU))+geom_bar(stat='identity', width=0.7)+ ggtitle ("State v.Median_IBU") + scale_fill_gradient2(midpoint=mean(df2$Median_IBU), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + coord_flip() + geom_text(data = df2, aes(x = State, label = paste(State, Median_IBU, sep=' - ')), position = position_dodge(width = 1), hjust = -0.1, size = 4) + scale_y_continuous(limits = c(0,max(df2$Median_IBU) *1.1))
 
 ```
 
-###5.Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer? 
+## Question 5: Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer? 
+### As you can see from the barplots, we've found that Maine has the highest ABV at 6.7%  and the most bitter beer with an IBU of 61.
 
 ```{r "Question 5", message = FALSE, warning = FALSE}
 #row number with of max value can be obtained by which.max, to get all information using by subsetting data frame. 
@@ -96,7 +92,8 @@ df2[which.max(df2$Median_IBU),]  ###Maine
 
 ```
 
-###6.Comment on the summary statistics and distribution of the ABV variable.
+## Question 6: Comment on the summary statistics and distribution of the ABV variable.
+
 ```{r "Question 6", message = FALSE, warning = FALSE}
 summary(df1)
 

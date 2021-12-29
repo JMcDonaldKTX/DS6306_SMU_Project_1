@@ -60,6 +60,7 @@ colSums(is.na(tdf))
 dtdf <- tdf[!is.na(tdf$ABV), ]
 dtdf <- tdf[!is.na(tdf$IBU), ]
 
+
 colSums(is.na(dtdf))
 
 ```
@@ -86,7 +87,8 @@ ggplot(data = df2, aes(x= State, y = Median_IBU ,fill = Median_IBU))+geom_bar(st
 #row number with of max value can be obtained by which.max, to get all information using by subsetting data frame. 
 
 df1[which.max(df1$Median_ABV),] ###Maine
-
+#IF we need to show the single highest ABV and IBU beers
+#tail(arrange(dtdf, ABV))
 
 df2[which.max(df2$Median_IBU),]  ###Maine
 
@@ -113,6 +115,63 @@ ggplot(dtdf, aes(x = ABV*100)) + geom_histogram(aes(y = ..count..), fill = '#971
 dtdf %>% ggplot(aes(x=ABV,y= IBU)) + geom_point() + geom_smooth (formula = y~ x,method="lm",col='#E02124',size=1) + ggtitle(("Relationship between ABV and IBU"))
 outliers <- dtdf[dtdf$ABV > 0.075, ]
 outliers <- outliers[outliers$IBU < 25, ]
-outliers
+outliers['Style']
+
 ```
+
+### Question 8: Budweiser would also like to investigate the difference with respect to IBU and ABV between IPAs (India Pale Ales) and other types of Ale (any beer with “Ale” in its name other than IPA).  You decide to use KNN classification to investigate this relationship.  Provide statistical evidence one way or the other. You can of course assume your audience is comfortable with percentages … KNN is very easy to understand conceptually.
+
+```{r "Question 8", message = FALSE, warning = FALSE}
+library(dplyr)
+library(class)
+library(caret)
+library(stringr)
+
+tdf <- merge(BeerN,Breweries, by = "Brew_ID", na.rm = True) %>% rename(Beer = Name.x, Brewery = Name.y)
+
+TD <- tdf %>% filter(grepl('IPA|Ale',Beer,ignore.case = T)) 
+ 
+TD = TD[!is.na(TD$ABV),]
+
+TD= TD[!is.na(TD$IBU), ]
+
+#dim(TD)
+#get just the 3 relevant columns and get rid of the rest
+TDSubset <- select(TD, ABV, IBU, Style)
+#make style a character from factor
+TDSubset$Style <- as.character(TDSubset$Style)
+
+#make all IPA's have Style of IPA and all ales have simply ale - eliminates all of the additional types to act on them as all the same
+for (i in 1:nrow(TDSubset)) {
+  if (is.na(str_match(TDSubset[i, 3], 'Ale'))) {
+    TDSubset[i,3] <- 'IPA' 
+    }
+  else { 
+    TDSubset[i,3] <- 'Ale'
+    }
+  }
+
+head(TDSubset)
+#take 70% of the TDSubset to use as train and the remainder as test
+ind = sample((1:nrow(TDSubset)),.7*nrow(TDSubset))
+train = TDSubset[ind,]
+test = TDSubset[-ind,]
+
+pred = c("ABV","IBU")
+
+#run 25 iterations to test the best value of K to test the best accuracy
+bestKResults <- data.frame(Acc = numeric(100), k = numeric(100))
+for (i in 1:25) {
+  class <- knn(train[,pred],test[,pred],train$Style , prob= TRUE, k= i)
+  conMatrix <- confusionMatrix(table(class, test$Style))
+  bestKResults$Acc[i] <- conMatrix$overall[1]
+  bestKResults$k[i] <- i
+  
+}
+
+ggplot(bestKResults, aes(x=k, y = Acc)) + geom_line()+ labs(x = "K Value", y = "Accuracy")
+
+
+classifications = knn(train[,pred],test[,pred],train$Style , prob= TRUE, k= 17)
+confusionMatrix(table(classifications, test$Style))
 

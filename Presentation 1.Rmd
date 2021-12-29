@@ -141,13 +141,13 @@ TDSubset <- select(TD, ABV, IBU, Style)
 #make style a character from factor
 TDSubset$Style <- as.character(TDSubset$Style)
 
-#make all IPA's have Style of IPA and all ales have simply ale - eliminates all of the additional types to act on them as all the same
+#make all IPA's have Style of IPA and all ales have simply ale - eliminates all of the additional types to act on them as all the same In response to Novin'ssuggestion to Ranjan, changing to 0 = ipa and 1 = ale
 for (i in 1:nrow(TDSubset)) {
   if (is.na(str_match(TDSubset[i, 3], 'Ale'))) {
-    TDSubset[i,3] <- 'IPA' 
+    TDSubset[i,3] <- 0 
     }
   else { 
-    TDSubset[i,3] <- 'Ale'
+    TDSubset[i,3] <- 1
     }
   }
 
@@ -159,9 +159,9 @@ test = TDSubset[-ind,]
 
 pred = c("ABV","IBU")
 
-#run 25 iterations to test the best value of K to test the best accuracy
+#run 50 iterations to test the best value of K to test the best accuracy
 bestKResults <- data.frame(Acc = numeric(100), k = numeric(100))
-for (i in 1:25) {
+for (i in 1:50) {
   class <- knn(train[,pred],test[,pred],train$Style , prob= TRUE, k= i)
   conMatrix <- confusionMatrix(table(class, test$Style))
   bestKResults$Acc[i] <- conMatrix$overall[1]

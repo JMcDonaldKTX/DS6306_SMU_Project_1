@@ -239,7 +239,7 @@ medianAPAIBU$Median_IBU
 ## Comparing craft lagers to Budweiser
 ### As recommended by the Budweiser websites 'Where to buy' search, I have used data from Publix, an American grocery market, to get the ABV and IBU for Budwesier beer.
 
-### [Publix](https://www.publix.com/pd/budweiser-beer/RIO-PCI-148406) lists the ABV as 5% and the IBU as 11.
+### [Publix](https://www.publix.com/pd/budweiser-beer/RIO-PCI-148406) lists Budwesier's ABV as 5% and the IBU as 11.
 
 ### For Lagers among the craft brewers, we found the following:
 

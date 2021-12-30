@@ -143,7 +143,7 @@ library(stringr)
 
 tdf <- merge(BeerN,Breweries, by = "Brew_ID", na.rm = True) %>% rename(Beer = Name.x, Brewery = Name.y)
 
-TD <- tdf %>% filter(grepl('IPA|Ale',Beer,ignore.case = T)) 
+TD <- tdf %>% filter(grepl('IPA|Ale',Style,ignore.case = T)) 
  
 TD = TD[!is.na(TD$ABV),]
 
@@ -189,3 +189,87 @@ ggplot(bestKResults, aes(x=k, y = Acc)) + geom_line()+ labs(x = "K Value", y = "
 classifications = knn(train[,pred],test[,pred],train$Style , prob= TRUE, k= 17)
 confusionMatrix(table(classifications, test$Style))
 
+```
+
+
+### Question 9: According to[Craft Beer Me](https://craftbeerme.com/guide-to-the-most-popular-types-of-craft-beer-in-america/), the 3 most popular beer styles in the US are from most to least, Lager, IPA, and American Pale Ale.
+
+### With Budweiser being a Lager, we wanted to see how Budweiser stacks up against other craft beer lagers and offer some insight into IPA and American Pale Ales.
+
+```{r "Question 9", message = FALSE, warning = FALSE}
+
+#create df for each lager, ipa, and apa, then remove all na IBU which will also remove any na abv as all na abv also have missing ibu
+lagerDF <- tdf %>% filter(grepl('lager',Style,ignore.case = T)) 
+ipaDF <- tdf %>% filter(grepl('IPA',Style,ignore.case = T)) 
+paleAleDF <- tdf %>% filter(grepl('american pale ale',Style,ignore.case = T)) 
+lagerDF <- lagerDF[!is.na(lagerDF$IBU), ]
+ipaDF <- ipaDF[!is.na(ipaDF$IBU), ]
+paleAleDF <- paleAleDF[!is.na(paleAleDF$IBU), ]
+
+#Find the max, min, and median ABV and IBU for each of the top 3 beer styles
+lagerDF[which.max(lagerDF$IBU),]
+lagerDF[which.min(lagerDF$IBU),]
+lagerDF[which.max(lagerDF$ABV),]
+lagerDF[which.min(lagerDF$ABV),]
+medianLagerIBU <- lagerDF %>% summarise(Median_IBU = median(IBU)) 
+medianLagerABV <- lagerDF %>% summarise(Median_ABV = median(ABV)) 
+medianLagerABV$Median_ABV
+medianLagerIBU$Median_IBU
+
+ipaDF[which.max(ipaDF$IBU),]
+ipaDF[which.min(ipaDF$IBU),]
+ipaDF[which.max(ipaDF$ABV),]
+ipaDF[which.min(ipaDF$ABV),]
+medianIPAIBU <- ipaDF %>% summarise(Median_IBU = median(IBU)) 
+medianIPAABV <- ipaDF %>% summarise(Median_ABV = median(ABV)) 
+medianIPAABV$Median_ABV
+medianIPAIBU$Median_IBU
+
+paleAleDF[which.max(paleAleDF$IBU),]
+paleAleDF[which.min(paleAleDF$IBU),]
+paleAleDF[which.max(paleAleDF$ABV),]
+paleAleDF[which.min(paleAleDF$ABV),]
+medianAPAIBU <- paleAleDF %>% summarise(Median_IBU = median(IBU)) 
+medianAPAABV <- paleAleDF %>% summarise(Median_ABV = median(ABV)) 
+medianAPAABV$Median_ABV
+medianAPAIBU$Median_IBU
+
+```
+
+## Comparing craft lagers to Budweiser
+### As recommended by the Budweiser websites 'Where to buy' search, I have used data from Publix, an American grocery market, to get the ABV and IBU for Budwesier beer.
+
+### [Publix](https://www.publix.com/pd/budweiser-beer/RIO-PCI-148406) lists the ABV as 5% and the IBU as 11.
+
+### For Lagers among the craft brewers, we found the following:
+
+| Measure      | Value |
+| ----------- | ----------- |
+| Max ABV      | 7.2%       |
+| Min ABV   | 3.2%        |
+| Max IBU      | 80       |
+| Min IBU   | 8        |
+| Median ABV| 4.9%       |
+| Median IBU   | 19        |
+
+### For India Pale Ales among the craft brewers, we found the following:
+
+| Measure      | Value |
+| ----------- | ----------- |
+| Max ABV      | 9.9%       |
+| Min ABV   | 3.8%        |
+| Max IBU      | 138       |
+| Min IBU   | 30    |
+| Median ABV| 6.8%       |
+| Median IBU   | 70        |
+
+### For American Pale Ales among the craft brewers, we found the following:
+
+| Measure      | Value |
+| ----------- | ----------- |
+| Max ABV      | 7.0%       |
+| Min ABV   | 3.7%        |
+| Max IBU      | 68       |
+| Min IBU   | 16      |
+| Median ABV| 5.5%       |
+| Median IBU   | 44        |

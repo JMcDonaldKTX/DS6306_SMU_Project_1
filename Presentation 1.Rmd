@@ -55,14 +55,22 @@ top_n(tdf,6,Brew_ID)
 ```{r "Question 3", message = FALSE, warning = FALSE}
 
 colSums(is.na(tdf))
+
+#Setup DF where we'll strip out missing data
+
+dtdf_RemoveNA_ABV <- tdf
+dtdf_RemoveNA_IBU <- tdf
+dtdf <- tdf
   
 ### assigning to new data frame 
-dtdf <- tdf[!is.na(tdf$ABV), ]
-dtdf <- tdf[!is.na(tdf$IBU), ]
+dtdf_RemoveNA_ABV <- dtdf_RemoveNA_ABV[!is.na(tdf$ABV), ]
+dtdf_RemoveNA_IBU <- dtdf_RemoveNA_IBU [!is.na(tdf$IBU), ]
+dtdf <- dtdf[!is.na(dtdf$ABV), ]
+dtdf <- dtdf[!is.na(dtdf$IBU), ]
 
-
+colSums(is.na(dtdf_RemoveNA_ABV))
+colSums(is.na(dtdf_RemoveNA_IBU))
 colSums(is.na(dtdf))
-
 ```
 
 ## Question 4: Compute the median alcohol content and international bitterness unit for each state. Plot a bar chart to compare.
@@ -70,27 +78,33 @@ colSums(is.na(dtdf))
 
 ```{r "Question 4", message = FALSE, warning = FALSE, fig.dim = c(11,9)}
 
-df1<- dtdf %>% group_by(State) %>% summarise(Median_ABV = median(ABV)) 
+df1 <- dtdf_RemoveNA_ABV %>% group_by(State) %>% summarise(Median_ABV = median(ABV)) 
 ggplot(data = df1, aes(x= State, y = Median_ABV * 100 ,fill = Median_ABV))+geom_bar(stat='identity', width=0.7) + ggtitle ("State v.Median_ABV") + scale_fill_gradient2(midpoint=mean(df1$Median_ABV), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + coord_flip() + geom_text(data = df1, aes(x = State, label = paste(State, paste(Median_ABV * 100, '%', sep = ''), sep=' - ')), position = position_dodge(width = 1), hjust = -0.1, size = 4) + scale_y_continuous(limits = c(0,max(df1$Median_ABV * 100) *1.1)) 
 ## question how can I do both at the same time 
 
 
-df2<- dtdf %>% group_by(State) %>% summarise(Median_IBU = median(IBU)) 
+df2 <- dtdf_RemoveNA_IBU %>% group_by(State) %>% summarise(Median_IBU = median(IBU)) 
 ggplot(data = df2, aes(x= State, y = Median_IBU ,fill = Median_IBU))+geom_bar(stat='identity', width=0.7)+ ggtitle ("State v.Median_IBU") + scale_fill_gradient2(midpoint=mean(df2$Median_IBU), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + coord_flip() + geom_text(data = df2, aes(x = State, label = paste(State, Median_IBU, sep=' - ')), position = position_dodge(width = 1), hjust = -0.1, size = 4) + scale_y_continuous(limits = c(0,max(df2$Median_IBU) *1.1))
 
 ```
 
 ## Question 5: Which state has the maximum alcoholic (ABV) beer? Which state has the most bitter (IBU) beer? 
-### As you can see from the barplots, we've found that Maine has the highest ABV at 6.7%  and the most bitter beer with an IBU of 61.
+### We analyzed this in two ways.  We wanted to see where the highest median ABV and IBU was located, along with the single highest ABV and IBU locations and details of those specific beers.
+
+### For the maximum median ABV, we found both Washington DC and Kentucky having a median ABV of 6.25%.  As for the single highest ABV, Colorado's Upslope Brewing Company's Lee Hill Series Volume 5 comes in with a max ABV of 12.8%.
+
+### For the maximum median IBU, Maine came in with a 61 median IBU.  For the individual beer with the highest IBU, from Oregon, Astoria Brewing Company's Bitter Bitch Imperial IPA has an IBU of 138.
 
 ```{r "Question 5", message = FALSE, warning = FALSE}
 #row number with of max value can be obtained by which.max, to get all information using by subsetting data frame. 
 
-df1[which.max(df1$Median_ABV),] ###Maine
+df1[which.max(df1$Median_ABV),] ###Kentucky and DC
+dtdf_RemoveNA_ABV[which.max(dtdf_RemoveNA_ABV$ABV),]
 #IF we need to show the single highest ABV and IBU beers
 #tail(arrange(dtdf, ABV))
 
 df2[which.max(df2$Median_IBU),]  ###Maine
+dtdf_RemoveNA_IBU[which.max(dtdf_RemoveNA_IBU$IBU),]
 
 ```
 
@@ -100,10 +114,10 @@ df2[which.max(df2$Median_IBU),]  ###Maine
 ```{r "Question 6", message = FALSE, warning = FALSE}
 summary(dtdf$ABV)
 
-sd(dtdf$ABV*100)   ###0.005437061
-mean(dtdf$ABV*100)  ### 0.05564
+sd(dtdf_RemoveNA_ABV$ABV*100)   ###0.005437061
+mean(dtdf_RemoveNA_ABV$ABV*100)  ### 0.05564
 
-ggplot(dtdf, aes(x = ABV*100)) + geom_histogram(aes(y = ..count..), fill = '#971B1E') + scale_y_continuous(name = "Frequency") + theme(legend.position = 'none') + scale_x_continuous(name = 'Median ABV (%)', breaks = seq(2,13,.5)) + geom_vline(aes(xintercept = mean(dtdf$ABV *100)),col='#FFF200',size=1) + geom_vline(aes(xintercept = median(dtdf$ABV *100)),col='#E02124',size=1)
+ggplot(dtdf_RemoveNA_ABV, aes(x = ABV*100)) + geom_histogram(aes(y = ..count..), fill = '#971B1E') + scale_y_continuous(name = "Frequency") + theme(legend.position = 'none') + scale_x_continuous(name = 'Median ABV (%)', breaks = seq(2,13,.5)) + geom_vline(aes(xintercept = mean(dtdf_RemoveNA_ABV$ABV *100)),col='#FFF200',size=1) + geom_vline(aes(xintercept = median(dtdf_RemoveNA_ABV$ABV *100)),col='#E02124',size=1)
 
 
 ```

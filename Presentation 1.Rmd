@@ -234,6 +234,21 @@ medianAPAABV <- paleAleDF %>% summarise(Median_ABV = median(ABV))
 medianAPAABV$Median_ABV
 medianAPAIBU$Median_IBU
 
+
+
+
+regions <- read.csv("states_by_region.csv", header = TRUE , ",")
+
+#regions has State.Code
+#ipaDF has State
+#need to mutate to join State.Code to ipaDF
+
+#ipaDF <- left_join(ipaDF, regions, by = c("State" = "State.Code"))
+#regions %>% rename(StateName = State, State = State.Code)
+head(regions)
+head(ipaDF)
+ipaDF <- merge(ipaDF,regions, by.x = 10, by.y = 2, na.rm = True)
+head(ipaDF)
 ```
 
 ## Comparing craft lagers to Budweiser

@@ -51,7 +51,7 @@ top_n(tdf,6,Brew_ID)
 ```
 
 ## Question 3: Address the missing values in each column.
-### We found 1005 beers which didn't have an IBU value and 62 that didn't have an ABV.  As your questions pertain to these values and there is no method that we can use to approximate the missing values, removing these beers from the dataset was the only option.
+### We found 1005 beers which didn't have an IBU value and 62 that didn't have an ABV.  As your questions pertain to these values and there is no method that we can use to approximate the missing values, removing these beers from the dataset was the only option when that variable is used in the analysis.
 ```{r "Question 3", message = FALSE, warning = FALSE}
 
 colSums(is.na(tdf))
@@ -135,6 +135,8 @@ outliers['Style']
 
 ### Question 8: Budweiser would also like to investigate the difference with respect to IBU and ABV between IPAs (India Pale Ales) and other types of Ale (any beer with “Ale” in its name other than IPA).  You decide to use KNN classification to investigate this relationship.  Provide statistical evidence one way or the other. You can of course assume your audience is comfortable with percentages … KNN is very easy to understand conceptually.
 
+### We chose to use a K nearest neighbors machine learning algorithm to attempt to define the relationship between IBU and ABV among the IPA and other Ale type craft beers.  We found that we can identify with approximatly 80% success whether a particular beer is an IPA or other Ale from those data points.
+
 ```{r "Question 8", message = FALSE, warning = FALSE}
 library(dplyr)
 library(class)
@@ -194,7 +196,7 @@ confusionMatrix(table(classifications, test$Style))
 
 ### Question 9: According to[Craft Beer Me](https://craftbeerme.com/guide-to-the-most-popular-types-of-craft-beer-in-america/), the 3 most popular beer styles in the US are from most to least, Lager, IPA, and American Pale Ale.
 
-### With Budweiser being a Lager, we wanted to see how Budweiser stacks up against other craft beer lagers and offer some insight into IPA and American Pale Ales.
+### With Budweiser being a Lager, we wanted to see how Budweiser stacks up against other craft beer lagers and offer some insight into IPA and American Pale Ales.  This may be of particular use if Budweiser chose to add an IPa to compliment the existing lager and American Ale beers that are enjoyed by customers today.
 
 ```{r "Question 9", message = FALSE, warning = FALSE}
 

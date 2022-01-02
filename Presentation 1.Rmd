@@ -243,12 +243,29 @@ regions <- read.csv("states_by_region.csv", header = TRUE , ",")
 #ipaDF has State
 #need to mutate to join State.Code to ipaDF
 
-#ipaDF <- left_join(ipaDF, regions, by = c("State" = "State.Code"))
-#regions %>% rename(StateName = State, State = State.Code)
-head(regions)
+
+regions <- regions %>% rename(StateName = State, State = State.Code)
+regions$State <- trimws(as.character(regions$State), which = c("both"), whitespace = "[ \t\r\n]")
+ipaDF$State <- trimws(as.character(ipaDF$State), which = c("both"), whitespace = "[ \t\r\n]")
+#head(regions)
+#head(ipaDF)
+ipaDF <-  merge(x=ipaDF,y=regions, by = "State", all.x=TRUE)
 head(ipaDF)
-ipaDF <- merge(ipaDF,regions, by.x = 10, by.y = 2, na.rm = True)
-head(ipaDF)
+
+#sumnmarise a count of IPAs, median abv and ibu by region
+
+ipaCountByDivision <- ipaDF %>% group_by(Division) %>% summarise(CountByDivision = n())
+ipaMedianABVByDivision <- ipaDF %>% group_by(Division) %>% summarise(Median_ABV = median(ABV))
+ipaMedianIBUByDivision <- ipaDF %>% group_by(Division) %>% summarise(Median_IBU = median(IBU))
+
+#Plot the counts by division
+ggplot(data = ipaCountByDivision, aes(x= Division, y = CountByDivision ,fill = CountByDivision))+geom_bar(stat='identity', width=0.7)+ ggtitle ("Number of IPAs in each Census Division") + scale_fill_gradient2(midpoint=mean(ipaCountByDivision$CountByDivision), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + coord_flip() + geom_text(data = ipaCountByDivision, aes(x = Division, label = CountByDivision), position = position_dodge(width = 1), hjust = -0.1, size = 4) + scale_y_continuous(limits = c(0,max(ipaCountByDivision$CountByDivision) *1.1))
+
+#Plot the median ABV by division
+ggplot(data = ipaMedianABVByDivision, aes(x= Division, y = Median_ABV ,fill = Median_ABV))+geom_bar(stat='identity', width=0.7)+ ggtitle ("Median ABV of IPAs in each Census Division") + scale_fill_gradient2(midpoint=mean(ipaMedianABVByDivision$Median_ABV), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + coord_flip() + geom_text(data = ipaMedianABVByDivision, aes(x = Division, label = paste(Median_ABV*100, " %", "" )), position = position_dodge(width = 1), hjust = -0.1, size = 4) + scale_y_continuous(limits = c(0,max(ipaMedianABVByDivision$Median_ABV) *1.1))
+
+#Plot the median IBU by Division
+ggplot(data = ipaMedianIBUByDivision, aes(x= Division, y = Median_IBU ,fill = Median_IBU))+geom_bar(stat='identity', width=0.7)+ ggtitle ("Median IBU of IPAs in each Census Division") + scale_fill_gradient2(midpoint=mean(ipaMedianIBUByDivision$Median_IBU), low= '#971B1E', mid = '#E02124', high = '#FFF200', space='#E1E1E1') + coord_flip() + geom_text(data = ipaMedianIBUByDivision, aes(x = Division, label = Median_IBU), position = position_dodge(width = 1), hjust = -0.1, size = 4) + scale_y_continuous(limits = c(0,max(ipaMedianIBUByDivision$Median_IBU) *1.1))
 ```
 
 ## Comparing craft lagers to Budweiser
@@ -288,3 +305,5 @@ head(ipaDF)
 | Min IBU   | 16      |
 | Median ABV| 5.5%       |
 | Median IBU   | 44        |
+
+### What we're demonstrating with these values and with the charts above is that should Budweiser look to extend on their existing Lager and American Ale products with a Budweiser IPA, potential divisions of the United States could provide insight into what the median ABV and median IBU values are in the respective division.  For example, with only 11 IPAs being made in the East South Central, the market there may be prime for a new Budweiser IPA.  The median ABV in that division is 7.5%, which does show to be the highest median ABV of any division.  The median IBU in the East South Central is a 68.  
